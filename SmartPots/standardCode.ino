@@ -24,12 +24,12 @@
 
  const short nivelAgua[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio,};
  const short output[] = {relay, reservatorioSensor};
- const short input[] = {};
+ const short input[] = { 10, 11, 12};
 
 
-unsigned const short clk;
-unsigned const short dat;
-unsigned const short rst;
+ const short clk = 10;
+ const short dat = 11;
+ const short rst = 12;
 
 
 
@@ -46,23 +46,30 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 
 void onCommand(){
   digitalWrite(reservatorioSensor, HIGH);
-  delay(5000);
 
   Serial.print(" Status: ");
-  int readNivel = (digitalRead(nivelAgua[1,2,3]));
-  Serial.println(readNivel);
-  delay(1000);
-  digitalWrite(reservatorioSensor, LOW);
-  if(readNivel == '001'){
 
-    lcd.clear();
-    lcd.backlight();
-    lcd.setCursor(0,2);
-    lcd.print("REABASTECER");
-    lcd.setCursor(1, 2);
-    lcd.print("IMEDIATAMENTE");
-    
-  }
+  int nivelArray[] =  {
+    digitalRead(nivelAgua[0]),
+    digitalRead(nivelAgua[1]), 
+    digitalRead(nivelAgua[2])
+    };
+
+    if(nivelArray[0] == 1){
+        Serial.println("reservatorio cheio");
+   }  
+    else if(nivelArray[1] == 0){
+        Serial.println("reservatorio em 50%");
+   } else if(nivelArray[2] == 0){
+        Serial.println("REABASTERCER IMEDIATAMENTE!");
+           lcd.clear();
+        lcd.backlight();
+        lcd.setCursor(0,2);
+        lcd.print("REABASTECER");
+        lcd.setCursor(1, 2);
+        lcd.print("IMEDIATAMENTE");
+   }
+  
 }
  
 
@@ -97,10 +104,14 @@ void setup(){
 
 
 void loop(){
-  int timer = 3600000;
-  delay(timer);
-  onCommand();
-  delay(3000);
+unsigned long previousMillis = 0;
+const long interval = 3600000; // 1 hora
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    onCommand();
+  }
+    delay(3000);
 }
 
 
