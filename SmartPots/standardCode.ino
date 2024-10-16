@@ -1,3 +1,7 @@
+/*
+  CODE WRITTEN BY VIGNOLIN - IF COPYING, PLEASE MAINTAIN THIS SECTION.
+*/
+
 //------- LIBRARIES ----------//
 
 #include <virtuabotixRTC.h>
@@ -19,8 +23,8 @@
  short relay = 9;
 
 
- const short niveis = 3;
- const short outputs = 2;
+ const short niveis = 2;
+ const short outputs = 1;
 
  const short nivelAgua[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio,};
  const short output[] = {relay, reservatorioSensor};
@@ -38,9 +42,6 @@
 virtuabotixRTC   myRTC(clk, dat, rst);    
 LiquidCrystal_I2C lcd(0x27,20,4);
 
-
-
-
 //--------- FUNÇÕES ------------
 
 
@@ -55,20 +56,22 @@ void onCommand(){
     digitalRead(nivelAgua[2])
     };
 
-    if(nivelArray[0] == 1){
-        Serial.println("reservatorio cheio");
-   }  
-    else if(nivelArray[1] == 0){
-        Serial.println("reservatorio em 50%");
-   } else if(nivelArray[2] == 0){
-        Serial.println("REABASTERCER IMEDIATAMENTE!");
-           lcd.clear();
-        lcd.backlight();
-        lcd.setCursor(0,2);
-        lcd.print("REABASTECER");
-        lcd.setCursor(1, 2);
-        lcd.print("IMEDIATAMENTE");
-   }
+  unsigned int bit;
+
+  if(nivelArray[0] != 1 && nivelArray[1] == 1){
+    int bit = "60%";
+  } else if(nivelArray[2] != 0 && nivelArray[1] == 0){
+    int bit = "40%";
+  } else if(nivelArray[2] == 0){
+    int bit = "20%";
+  } else if(nivelArray[0] == 1){
+    int bit = "80%";
+  }
+  Serial.print(bit);
+  lcd.backlight();      lcd.setCursor(0,2);
+  lcd.print("RESERVATORIO EM:");
+  lcd.setCursor(1, 7);
+  lcd.print(bit);
   
 }
  
@@ -105,13 +108,13 @@ void setup(){
 
 void loop(){
 unsigned long previousMillis = 0;
-const long interval = 3600000; // 1 hora
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
+const long intervalo = 3600000; // 1 hora
+  unsigned long tempoAtual = millis();
+  if (tempoAtual - previousMillis >= intervalo) {
+    previousMillis = tempoAtual;
     onCommand();
   }
-    delay(3000);
+  delay(1000);
 }
 
 
