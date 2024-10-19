@@ -1,5 +1,6 @@
 /*
-  CODE WRITTEN BY VIGNOLIN - IF COPYING, PLEASE MAINTAIN THIS SECTION.
+ 
+ ^` CODE WRITTEN BY VIGNOLIN - IF COPYING, PLEASE MAINTAIN THIS SECTION.
 */
 
 //------- LIBRARIES ----------//
@@ -116,15 +117,3 @@ const long intervalo = 3600000; // 1 hora
   }
   delay(1000);
 }
-
-
-
-
-
-
-
-
-
-
-
-
