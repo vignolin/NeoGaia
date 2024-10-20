@@ -16,7 +16,7 @@ the Smart-Pots use either capacitive moisture sensors or regular ones, depending
  - #### Temperature Sensors: 
 little to none pots feature this sensors, however big ones need a way of controlling temperature of the plants. When a high temperature is sensored, the pot activates its irrigation system to decrease it.
  - #### Water Pumps
-Water Pump: different Smart-Pots, obviously, feature different sized water pumps, however their differences are minuscule and, in most cases, there are only a few software changes.   
+Water Pump: different Smart-Pots, obviously, feature different sized water pumps, however their differences are minuscule and, in most cases, there are only a few software changes.  The prismatic design uses, picture below, a 2-6V 100-120L/h with 2,5cm of diameter water pump.
 
 ![image][imagem bomba]
 
