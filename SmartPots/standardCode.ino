@@ -17,21 +17,21 @@ const short reservatorioCheio = 2;
 const  short reservatorioMeio = 3;
 const short reservatorioVazio = 4;
 
-const short sensorUmidade = 7; 
+const short sensorUmidade = A0; 
 
-const short dataPin = 8; // Shift Register 74hc595n
-const short clockPin = 9; // Shift Register 74hc595n
-const short latchPin = 10; // Shift Register 74hc595n
+const int dataPin = 8; // Shift Register 74hc595n
+const int clockPin = 9; // Shift Register 74hc595n
+const int latchPin = 10; // Shift Register 74hc595n
  byte com0; // Shift Register 74hc595n
 
  
 
 
 
-short niveis = 2;
+short inputs = 3;
 short outputs = 1;
- const short inputs[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio};
- const short output[] = { dataPin, clockPin, latchPin};
+ const short inputs[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio, sensorUmidade};
+ const short output[] = {dataPin, clockPin, latchPin};
  
 
 
@@ -53,13 +53,12 @@ virtuabotixRTC   myRTC(clk, dat, rst);
 LiquidCrystal_I2C lcd(0x27,20,4);
 
 //--------- FUNÇÕES ------------
-
-void updateShiftRegister(){
-  digitalWrite(latchPin, LOW);
-  ShiftOut(dataPin, clockPin, MSBFIRST, com0);
-  digitalWrite(latchPin, HIGH);
-}
-void onCommand(){
+ void updateShiftRegister(){
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, LSBFIRST, j);
+    digitalWrite(latchPin, HIGH);
+ }
+void lerReservatorio(){
   com0 = B00000010;
   updateShiftRegister();
   Serial.print(" Status: ");
@@ -70,8 +69,8 @@ void onCommand(){
     digitalRead(inputs[2])
     };
 
-  unsigned int bit;
 
+  unsigned int bit;
   if(nivelArray[0] != 1 && nivelArray[1] == 1){
     int bit = "60%";
   } else if(nivelArray[2] != 0 && nivelArray[1] == 0){
@@ -90,8 +89,22 @@ void onCommand(){
   
   com0 = B00000000;
   updateShiftRegister();
-  
+
 }
+ 
+ void regarPlanta(){
+  byte com0 = B00000100;
+  updateShiftRegister();
+  short umidade = digitalRead(sensorUmidade);
+  if(umidade != 0){
+    byte com0 = B00000001;
+    updateShiftRegister();
+  } else {
+    byte com0 = B00000000;
+    updateShiftRegister();
+  }
+  
+ }
  
 
 
