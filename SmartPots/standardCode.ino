@@ -13,30 +13,39 @@
 
 // ------ VARIABLES, CONSTANTS AND ARRAYS ------- //
 
+const short reservatorioCheio = 2;
+const  short reservatorioMeio = 3;
+const short reservatorioVazio = 4;
 
- short reservatorioCheio = 2;
- short reservatorioMeio = 3;
- short reservatorioVazio = 4;
- short reservatorioSensor = 6;
+const short sensorUmidade = 7; 
 
- short sensorPower = 7;
- short sensorMoisture = 8; 
- short relay = 9;
+const short dataPin = 8; // Shift Register 74hc595n
+const short clockPin = 9; // Shift Register 74hc595n
+const short latchPin = 10; // Shift Register 74hc595n
+ byte com0; // Shift Register 74hc595n
 
-
- const short niveis = 2;
- const short outputs = 1;
-
- const short nivelAgua[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio,};
- const short output[] = {relay, reservatorioSensor};
- const short input[] = { 10, 11, 12};
+ 
 
 
- const short clk = 10;
- const short dat = 11;
- const short rst = 12;
+
+short niveis = 2;
+short outputs = 1;
+ const short inputs[] = {reservatorioCheio, reservatorioMeio, reservatorioVazio};
+ const short output[] = { dataPin, clockPin, latchPin};
+ 
 
 
+ const short clk = 10; // RTC DS1302
+ const short dat = 11; // RTC DS1302
+ const short rst = 12; // RTC DS1302
+
+
+ /* Protocolo para o 74hc595:
+   - Pinos: 
+     D1 = bomba d'água;
+     D2 = energia no reservatório; 
+     D3 = sensor de Umidade;
+ */
 
 // --------- OBJECTS ----------- //
 
@@ -45,16 +54,20 @@ LiquidCrystal_I2C lcd(0x27,20,4);
 
 //--------- FUNÇÕES ------------
 
-
+void updateShiftRegister(){
+  digitalWrite(latchPin, LOW);
+  ShiftOut(dataPin, clockPin, MSBFIRST, com0);
+  digitalWrite(latchPin, HIGH);
+}
 void onCommand(){
-  digitalWrite(reservatorioSensor, HIGH);
-
+  com0 = B00000010;
+  updateShiftRegister();
   Serial.print(" Status: ");
 
   int nivelArray[] =  {
-    digitalRead(nivelAgua[0]),
-    digitalRead(nivelAgua[1]), 
-    digitalRead(nivelAgua[2])
+    digitalRead(inputs[0]),
+    digitalRead(inputs[1]), 
+    digitalRead(inputs[2])
     };
 
   unsigned int bit;
@@ -69,10 +82,14 @@ void onCommand(){
     int bit = "80%";
   }
   Serial.print(bit);
-  lcd.backlight();      lcd.setCursor(0,2);
+  lcd.backlight();     
+  lcd.setCursor(0,2);
   lcd.print("RESERVATORIO EM:");
   lcd.setCursor(1, 7);
   lcd.print(bit);
+  
+  com0 = B00000000;
+  updateShiftRegister();
   
 }
  
@@ -84,10 +101,10 @@ void onCommand(){
 void setup(){
   Serial.begin(9600);
 // ajustar pinos i/o;
-  for(short NivelAgua = 0; NivelAgua<niveis; NivelAgua++){
-  pinMode(nivelAgua[NivelAgua], INPUT);
+  for(short pinos = 0; pinos<inputs; pinos++){
+  pinMode(inputs[pinos], INPUT);
   Serial.print("Nível ");
-  Serial.print(NivelAgua);
+  Serial.print(pinos);
   Serial.println(" ajustado corretamente");
   }
   for(short pinosout = 0; pinosout<outputs; pinosout++){
@@ -96,23 +113,15 @@ void setup(){
     Serial.print(pinosout);
     Serial.println("Ajustado!");
   }
-   for(short pinosin = 0; pinosin<input; pinosin++){
-    pinMode(input[pinosin], INPUT);
-    Serial.println("Pinos Input:");
-    Serial.print(pinosin);
-    Serial.println("Ajustado!");
-  }
-  Serial.println("========================");
-}
-
+} 
 
 
 void loop(){
-unsigned long previousMillis = 0;
+unsigned long tempoAnterior = 0;
 const long intervalo = 3600000; // 1 hora
   unsigned long tempoAtual = millis();
-  if (tempoAtual - previousMillis >= intervalo) {
-    previousMillis = tempoAtual;
+  if (tempoAtual - tempoAnterior >= intervalo) {
+    tempoAnterior = tempoAtual;
     onCommand();
   }
   delay(1000);
